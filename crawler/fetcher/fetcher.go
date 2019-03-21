@@ -42,8 +42,8 @@ func Fetch(url string) ([]byte, error){
 	//utf8Reader := transform.NewReader(resp.Body, simplifiedchinese.GBK.NewDecoder())
 
 	//自动检测编码  x/net/html
+	//将编码转为UTF-8
 	buf := bufio.NewReader(resp.Body)
-	//all, err := ioutil.ReadAll(buf)
 	e := DetermineEncoding(buf)
 	utf8Reader := transform.NewReader(buf, e.NewDecoder())
 	all, err := ioutil.ReadAll(utf8Reader)
