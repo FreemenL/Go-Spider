@@ -132,5 +132,8 @@ func WriteToFile(u model.User){
 	count = strconv.Itoa(u.TotalCollectionsCount)
 	cell.Value = count
 
-	file.Save(filename)
+	err = file.Save(filename)
+	if err!=nil{
+		fmt.Errorf("save error : %s", err)
+	}
 }
