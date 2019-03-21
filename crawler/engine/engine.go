@@ -43,13 +43,19 @@ func Run(seeds ...Request){
 		requests = append(requests, parserResult.Requests...)
 
 		//将接口进行类型转换
-		for _, item:= range parserResult.Items{
-			if i, ok := item.(model.User);ok{
-				log.Println(i.Username)
-				WriteToFile(i)
-			}
-			count++
-		}
+		WriteToFile(parserResult)
+		//for _, item:= range parserResult.Items{
+		//	if i, ok := item.(model.User);ok{
+		//		log.Println(i.Username)
+		//		WriteToFile(i)
+		//	}
+		//	count++
+		//}
+
+		//items :=  parserResult.Items
+		//if i, ok := items.([]model.User); ok{
+		//	WriteToFile(i...)
+		//}
 
 		log.Printf("总数为：%d \n", count)
 	}
@@ -93,44 +99,56 @@ func CreateFile(filename string){
 }
 
 //将结果写入excel表中
-func WriteToFile(u model.User){
-	file ,err := xlsx.OpenFile(filename)
+func WriteToFile(result ParserResult){
 
+	//判断是否为User类型的接口
+	if len(result.Items)>0{
+		if _, ok := result.Items[0].(model.User);!ok{
+			return
+		}
+	}
+
+
+	file ,err := xlsx.OpenFile(filename)
 	if err!= nil{
 		fmt.Errorf("open file error")
 		return
 	}
-	sheet := file.Sheet["UserInfo"]
-	row := sheet.AddRow()
 
-	cell := row.AddCell()
-	cell.Value = u.Username
+	for _,v := range result.Items {
+		u,_ := v.(model.User)
+		sheet := file.Sheet["UserInfo"]
+		row := sheet.AddRow()
 
-	cell = row.AddCell()
-	cell.Value = u.Company
+		cell := row.AddCell()
+		cell.Value = u.Username
 
-	cell = row.AddCell()
-	cell.Value = u.JobTitle
+		cell = row.AddCell()
+		cell.Value = u.Company
 
-	cell = row.AddCell()
-	count := strconv.Itoa(u.FollowersCount)
-	cell.Value = count
+		cell = row.AddCell()
+		cell.Value = u.JobTitle
 
-	cell = row.AddCell()
-	count = strconv.Itoa(u.FolloweesCount)
-	cell.Value = count
+		cell = row.AddCell()
+		count := strconv.Itoa(u.FollowersCount)
+		cell.Value = count
 
-	cell = row.AddCell()
-	count = strconv.Itoa(u.PostedPostsCount)
-	cell.Value = count
+		cell = row.AddCell()
+		count = strconv.Itoa(u.FolloweesCount)
+		cell.Value = count
 
-	cell = row.AddCell()
-	count = strconv.Itoa(u.PostedEntriesCount)
-	cell.Value = count
+		cell = row.AddCell()
+		count = strconv.Itoa(u.PostedPostsCount)
+		cell.Value = count
 
-	cell = row.AddCell()
-	count = strconv.Itoa(u.TotalCollectionsCount)
-	cell.Value = count
+		cell = row.AddCell()
+		count = strconv.Itoa(u.PostedEntriesCount)
+		cell.Value = count
+
+		cell = row.AddCell()
+		count = strconv.Itoa(u.TotalCollectionsCount)
+		cell.Value = count
+	}
 
 	err = file.Save(filename)
 	if err!=nil{
